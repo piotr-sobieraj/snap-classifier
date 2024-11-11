@@ -1,53 +1,50 @@
 import pickle
+import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from flask import Flask, jsonify, request
 from replit.object_storage import Client
 
-
 app = Flask(__name__)
 
+# Inicjalizacja modelu KNN na poziomie globalnym
+knn = None
+
+# Funkcja inicjalizująca model KNN przy starcie serwera
+def load_knn_model():
+    global knn
+    client = Client()
+    file_data = client.download_as_bytes("knn_model.pkl")
+    if file_data:
+        knn = pickle.loads(file_data)
+        return knn
+    else:
+        raise FileNotFoundError("Model nie został znaleziony w object storage.")
+
+# Ładowanie modelu
+try:
+    knn = load_knn_model()
+except Exception as e:
+    print(f"Error loading model: {e}")
 
 @app.route('/')
 def index():
-    client = Client()
+    return "Serwer Flask działa poprawnie. Model jest gotowy do użycia."
 
-    # Pobranie modelu KNN jako dane binarne
-    try:
-        file_data = client.download_as_bytes("knn_model.pkl")
-    except Exception as e:
-        return f"Nie udało się pobrać modelu: {e}", 500
-
-    # Załaduj model KNN za pomocą pickle
-    if file_data:
-        knn_loaded = pickle.loads(file_data)
-        return "Model został załadowany i jest gotowy do użycia."
-    else:
-        return "Model nie został znaleziony w object storage.", 404
-
-
+# Endpoint do walidacji obrazka
 @app.route('/image', methods=['POST'])
 def load_image():
     data = request.get_json()
 
     # Sprawdzenie, czy dane zostały przesłane
-    if data is None:
-        return jsonify({"error": "No data provided"}), 400
+    if data is None or 'image' not in data:
+        return jsonify({"error": "Expected 'image' key with vector data."}), 400
 
-    # Sprawdzenie, czy przesłany wektor jest odpowiedniej długości
-    if 'image' not in data:
-        return jsonify({"error": 'Expected an image in format of a vector.'}), 400
-        
+    # Walidacja długości wektora
     v_len = len(data['image'])
     if v_len != 784:
-        return jsonify({"error": f"Invalid image length. Expected 784 elements for MNIST image, got {v_len}"}), 400
+        return jsonify({"error": f"Invalid image length. Expected 784 elements, got {v_len}"}), 400
 
-    # Tutaj można wstawić kod klasyfikacyjny, np. wywołanie modelu predykcyjnego
-    # W tym przykładzie zwracamy tylko informację zwrotną z potwierdzeniem
-    # Przykład: predykcja = model.predict(data['vector'])
-
-    # Zwracamy informację zwrotną (tutaj tylko przykładowa odpowiedź)
-    response = {"message": "Image received", "image": sum(data['image'])}
-    return jsonify(response), 200
+    return jsonify({"message": "Image received and validated"}), 200
 
 # Endpoint do klasyfikacji obrazka
 @app.route('/classify', methods=['POST'])
@@ -56,13 +53,16 @@ def classify():
     if 'image' not in data:
         return jsonify({"error": "Brak obrazka w żądaniu"}), 400
 
+    # Check if the model is loaded
+    if knn is None:
+        return jsonify({"error": "Model is not loaded."}), 500
+
     # Pobranie i przetworzenie wektora obrazka
-    img_vector = np.array(data['vector']).reshape(1, 28 * 28).astype('float32') / 255
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
 
     # Predykcja etykiety za pomocą załadowanego modelu
     predicted_label = knn.predict(img_vector)[0]
     return jsonify({"prediction": int(predicted_label)})
 
-
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
