@@ -49,7 +49,19 @@ def load_image():
     response = {"message": "Image received", "image": sum(data['image'])}
     return jsonify(response), 200
 
+# Endpoint do klasyfikacji obrazka
+@app.route('/classify', methods=['POST'])
+def classify():
+    data = request.get_json()
+    if 'image' not in data:
+        return jsonify({"error": "Brak obrazka w żądaniu"}), 400
 
+    # Pobranie i przetworzenie wektora obrazka
+    img_vector = np.array(data['vector']).reshape(1, 28 * 28).astype('float32') / 255
+
+    # Predykcja etykiety za pomocą załadowanego modelu
+    predicted_label = knn.predict(img_vector)[0]
+    return jsonify({"prediction": int(predicted_label)})
 
 
 if __name__ == '__main__':
