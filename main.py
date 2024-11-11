@@ -1,11 +1,29 @@
+import pickle
+from sklearn.neighbors import KNeighborsClassifier
 from flask import Flask, jsonify, request
+from replit.object_storage import Client
+
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    return 'Hello from Snap Classifier!'
+    client = Client()
+
+    # Pobranie modelu KNN jako dane binarne
+    try:
+        file_data = client.download_as_bytes("knn_model.pkl")
+    except Exception as e:
+        return f"Nie udało się pobrać modelu: {e}", 500
+
+    # Załaduj model KNN za pomocą pickle
+    if file_data:
+        knn_loaded = pickle.loads(file_data)
+        return "Model został załadowany i jest gotowy do użycia."
+    else:
+        return "Model nie został znaleziony w object storage.", 404
+
 
 @app.route('/image', methods=['POST'])
 def classify_image():
@@ -30,6 +48,8 @@ def classify_image():
     # Zwracamy informację zwrotną (tutaj tylko przykładowa odpowiedź)
     response = {"message": "Image received", "image": sum(data['image'])}
     return jsonify(response), 200
+
+
 
 
 if __name__ == '__main__':
