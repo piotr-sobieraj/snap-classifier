@@ -1,6 +1,5 @@
 import pickle
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
 from flask import Flask, jsonify, request
 from replit.object_storage import Client
 
@@ -28,7 +27,7 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return "Serwer Flask działa poprawnie. Model jest gotowy do użycia."
+    return "Serwer Flask działa poprawnie. Model KNN jest gotowy do użycia."
 
 # Endpoint do walidacji obrazka
 @app.route('/image', methods=['POST'])
