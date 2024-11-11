@@ -2,8 +2,11 @@ import pickle
 import numpy as np
 from flask import Flask, jsonify, request
 from replit.object_storage import Client
+from flask_cors import CORS  # Import CORS
+
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Inicjalizacja modelu KNN na poziomie globalnym
 knn = None
