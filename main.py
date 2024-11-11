@@ -26,7 +26,7 @@ def index():
 
 
 @app.route('/image', methods=['POST'])
-def classify_image():
+def load_image():
     data = request.get_json()
 
     # Sprawdzenie, czy dane zostały przesłane
