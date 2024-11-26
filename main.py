@@ -93,12 +93,16 @@ def classify_mlp():
     if mlp is None:
         return jsonify({"error": "Model MLP nie został załadowany."}), 500
 
+    print (jsonify(mlp.summary()))
+    
     # Pobranie i przetworzenie wektora obrazka
-    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32')
-
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
+    
+    
     # Predykcja etykiety za pomocą załadowanego modelu
-    predicted_label = mlp.predict(img_vector)[0]
-    return jsonify({"prediction MLP": int(predicted_label)})
+    predictions = mlp.predict(img_vector)[0]
+    print(predictions)
+    return jsonify(predictions.tolist())
 
 
 if __name__ == '__main__':
