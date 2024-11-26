@@ -1,9 +1,9 @@
 import pickle
+
 import numpy as np
 from flask import Flask, jsonify, request
-from replit.object_storage import Client
 from flask_cors import CORS  # Import CORS
-
+from replit.object_storage import Client
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -45,7 +45,7 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return "Serwer Flask działa poprawnie. Modele KNN i MLP są gotowe do użycia."
+    return "Serwer Flask działa poprawnie. Modele KNN i MLP zostały wczytane"
 
 # Endpoint do walidacji obrazka
 @app.route('/image', methods=['POST'])
@@ -66,7 +66,7 @@ def load_image():
 # Endpoint do klasyfikacji obrazka
 @app.route('/classify', methods=['POST'])
 def classify():
-    return classify_knn()
+    return classify_mlp()
 
 def classify_knn():
     data = request.get_json()
@@ -78,11 +78,11 @@ def classify_knn():
         return jsonify({"error": "Model is not loaded."}), 500
 
     # Pobranie i przetworzenie wektora obrazka
-    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32')
 
     # Predykcja etykiety za pomocą załadowanego modelu
     predicted_label = knn.predict(img_vector)[0]
-    return jsonify({"prediction": int(predicted_label)})
+    return jsonify({"prediction KNN": int(predicted_label)})
 
 def classify_mlp():
     data = request.get_json()
@@ -94,13 +94,12 @@ def classify_mlp():
         return jsonify({"error": "Model MLP nie został załadowany."}), 500
 
     # Pobranie i przetworzenie wektora obrazka
-    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32')
 
     # Predykcja etykiety za pomocą załadowanego modelu
     predicted_label = mlp.predict(img_vector)[0]
-    return jsonify({"prediction": int(predicted_label)})
+    return jsonify({"prediction MLP": int(predicted_label)})
 
 
-    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
