@@ -8,8 +8,9 @@ from flask_cors import CORS  # Import CORS
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Inicjalizacja modelu KNN na poziomie globalnym
+# Inicjalizacja modeli KNN i MLP na poziomie globalnym
 knn = None
+mlp = None
 
 # Funkcja inicjalizująca model KNN przy starcie serwera
 def load_knn_model():
@@ -20,17 +21,31 @@ def load_knn_model():
         knn = pickle.loads(file_data)
         return knn
     else:
-        raise FileNotFoundError("Model nie został znaleziony w object storage.")
+        raise FileNotFoundError("Model KNN nie został znaleziony w object storage.")
+
+# Funkcja inicjalizująca model MLP przy starcie serwera
+def load_mlp_model():
+    global mlp
+    client = Client()
+    file_data = client.download_as_bytes("mlp_model.pkl")
+    if file_data:
+        mlp = pickle.loads(file_data)
+        return mlp
+    else:
+        raise FileNotFoundError("Model MLP nie został znaleziony w object storage.")
+
+
 
 # Ładowanie modelu
 try:
     knn = load_knn_model()
+    mlp = load_mlp_model()
 except Exception as e:
-    print(f"Error loading model: {e}")
+    print(f"Błąd ładowania modeli: {e}")
 
 @app.route('/')
 def index():
-    return "Serwer Flask działa poprawnie. Model KNN jest gotowy do użycia."
+    return "Serwer Flask działa poprawnie. Modele KNN i MLP są gotowe do użycia."
 
 # Endpoint do walidacji obrazka
 @app.route('/image', methods=['POST'])
@@ -51,6 +66,9 @@ def load_image():
 # Endpoint do klasyfikacji obrazka
 @app.route('/classify', methods=['POST'])
 def classify():
+    return classify_knn()
+
+def classify_knn():
     data = request.get_json()
     if 'image' not in data:
         return jsonify({"error": "Brak obrazka w żądaniu"}), 400
@@ -66,5 +84,23 @@ def classify():
     predicted_label = knn.predict(img_vector)[0]
     return jsonify({"prediction": int(predicted_label)})
 
+def classify_mlp():
+    data = request.get_json()
+    if 'image' not in data:
+        return jsonify({"error": "Brak obrazka w żądaniu"}), 400
+
+    # Check if the model is loaded
+    if mlp is None:
+        return jsonify({"error": "Model MLP nie został załadowany."}), 500
+
+    # Pobranie i przetworzenie wektora obrazka
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
+
+    # Predykcja etykiety za pomocą załadowanego modelu
+    predicted_label = mlp.predict(img_vector)[0]
+    return jsonify({"prediction": int(predicted_label)})
+
+
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
