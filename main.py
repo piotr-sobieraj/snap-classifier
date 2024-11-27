@@ -39,7 +39,9 @@ def load_mlp_model():
 # Ładowanie modelu
 try:
     knn = load_knn_model()
+
     mlp = load_mlp_model()
+    print (jsonify(mlp.summary()))
 except Exception as e:
     print(f"Błąd ładowania modeli: {e}")
 
@@ -47,6 +49,7 @@ except Exception as e:
 def index():
     return "Serwer Flask działa poprawnie. Modele KNN i MLP zostały wczytane"
 
+## Wywalić endpoint, dodać walidację do preprocess_image
 # Endpoint do walidacji obrazka
 @app.route('/image', methods=['POST'])
 def load_image():
@@ -54,19 +57,30 @@ def load_image():
 
     # Sprawdzenie, czy dane zostały przesłane
     if data is None or 'image' not in data:
-        return jsonify({"error": "Expected 'image' key with vector data."}), 400
+        return jsonify({"error": "Oczekiwano klucza 'image' w jsonie."}), 400
 
     # Walidacja długości wektora
     v_len = len(data['image'])
     if v_len != 784:
-        return jsonify({"error": f"Invalid image length. Expected 784 elements, got {v_len}"}), 400
+        return jsonify({"error": f"Nieprawidłowa długość wektora z obrazem. Oczekiwano 784 elementów, jest {v_len}."}), 400
 
-    return jsonify({"message": "Image received and validated"}), 200
+    return jsonify({"message": "Obrazek został odebrany i zwalidowany"}), 200
+
+# Użyć
+def preprocess_image(image):
+    img = np.array(image).reshape(28,28,1).astype('float32') / 255.0
+    return img
 
 # Endpoint do klasyfikacji obrazka
-@app.route('/classify', methods=['POST'])
-def classify():
+@app.route('/classify_knn', methods=['POST'])
+def classify_knn_client():
+    return classify_knn()
+
+# Endpoint do klasyfikacji obrazka
+@app.route('/classify_mlp', methods=['POST'])
+def classify_mlp_client():
     return classify_mlp()
+
 
 def classify_knn():
     data = request.get_json()
@@ -93,16 +107,31 @@ def classify_mlp():
     if mlp is None:
         return jsonify({"error": "Model MLP nie został załadowany."}), 500
 
-    print (jsonify(mlp.summary()))
     
     # Pobranie i przetworzenie wektora obrazka
     img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
     
-    
     # Predykcja etykiety za pomocą załadowanego modelu
     predictions = mlp.predict(img_vector)[0]
-    print(predictions)
-    return jsonify(predictions.tolist())
+    
+    return jsonify(format_json_data(predictions))
+
+
+def format_json_data(predictions):
+    # Znajdź klasę z najwyższym prawdopodobieństwem
+    predicted_class = int(np.argmax(predictions.tolist()))
+
+    # Prawdopodobieństwa pozostałych etykiet
+    rounded_probabilities = [round(float(p), 5) for p in predictions]
+
+    # Przygotuj wynik
+    result = {
+      "prediction MLP": predicted_class,
+      "probabilities": rounded_probabilities
+    }
+
+    return result
+
 
 
 if __name__ == '__main__':
