@@ -28,7 +28,6 @@ def index():
     return "Serwer Flask działa poprawnie. Modele KNN i MLP zostały wczytane"
 
 
-
 # Endpoint do klasyfikacji obrazka
 @app.route('/classify_knn', methods=['POST'])
 def classify_knn_client():

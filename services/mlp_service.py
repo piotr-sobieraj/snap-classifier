@@ -1,10 +1,8 @@
 import pickle
+
 import numpy as np
-
-
 from flask import jsonify, request
 from replit.object_storage import Client
-
 
 from utils.data_formatter import format_json_data
 from utils.image_processing import preprocess_image, validate_image
