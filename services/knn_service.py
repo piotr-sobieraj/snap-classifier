@@ -4,8 +4,7 @@ import numpy as np
 from flask import jsonify, request
 from replit.object_storage import Client
 
-from utils.image_processing import preprocess_image, validate_image
-
+from utils.image_processing import validate_image
 
 
 # Funkcja inicjalizująca model KNN przy starcie serwera
