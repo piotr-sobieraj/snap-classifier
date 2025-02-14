@@ -38,4 +38,4 @@ def classify_mlp():
     # Predykcja etykiety za pomocą załadowanego modelu
     predictions = mlp.predict(img_vector)[0]
 
-    return jsonify(format_json_data(predictions))
+    return jsonify(format_json_data(predictions, 'MLP'))

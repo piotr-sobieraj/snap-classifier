@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def format_json_data(predictions):
+def format_json_data(predictions, source_model):
     # Znajdź klasę z najwyższym prawdopodobieństwem
     predicted_class = int(np.argmax(predictions.tolist()))
 
@@ -13,7 +13,7 @@ def format_json_data(predictions):
 
     # Przygotuj wynik
     result = {
-      "prediction MLP": predicted_class,
+      f"prediction {source_model}": predicted_class,
       "probabilities": probabilities_dict
     }
 
