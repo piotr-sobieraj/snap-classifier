@@ -2,7 +2,7 @@ import numpy as np
 
 
 def preprocess_image(image):
-    img = np.array(image).reshape(28,28,1).astype('float32') / 255.0
+    img = np.array(image).reshape(28,28,1).astype('float32')
     return img
 
 

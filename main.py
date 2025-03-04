@@ -1,6 +1,5 @@
 from flask import Flask, jsonify
 from flask_cors import CORS  # Import CORS
-from replit.object_storage import Client
 
 from services.cnn_service import classify_cnn, load_cnn_model
 from services.knn_service import classify_knn, load_knn_model
@@ -20,16 +19,13 @@ try:
     knn = load_knn_model()
     mlp = load_mlp_model()
     cnn = load_cnn_model()
-    print (jsonify(mlp.summary()))
-    print (jsonify(mlp.summary()))
-    print (jsonify(cnn.summary()))
 except Exception as e:
     print(f"Błąd ładowania modeli: {e}")
 
 @app.route('/')
 def index():
-    return "Serwer Flask działa poprawnie. Modele KNN, MLP i CNN zostały wczytane"
-
+    return "Serwer Flask działa poprawnie. Modele KNN, MLP i CNN zostały wczytane."
+    
 
 # Endpoint do klasyfikacji obrazka KNN
 @app.route('/classify_knn', methods=['POST'])

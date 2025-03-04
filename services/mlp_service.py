@@ -8,11 +8,11 @@ from utils.data_formatter import format_json_data
 from utils.image_processing import validate_image
 
 
-# Funkcja inicjalizująca model MLP przy starcie serwera
+# Funkcja ładująca model MLP
 def load_mlp_model():
     global mlp
     client = Client()
-    file_data = client.download_as_bytes("mlp_model.pkl")
+    file_data = client.download_as_bytes("model_mlp.pkl")
     if file_data:
         mlp = pickle.loads(file_data)
         return mlp

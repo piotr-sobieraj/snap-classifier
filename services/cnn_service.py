@@ -8,7 +8,7 @@ from utils.data_formatter import format_json_data
 from utils.image_processing import validate_image
 
 
-# Funkcja inicjalizująca model MLP przy starcie serwera
+# Funkcja ładująca model MLP
 def load_cnn_model():
     global cnn
     client = Client()

@@ -7,7 +7,7 @@ from replit.object_storage import Client
 from utils.image_processing import validate_image
 
 
-# Funkcja inicjalizująca model KNN przy starcie serwera
+# Funkcja ładująca model KNN 
 def load_knn_model():
     global knn
     client = Client()
