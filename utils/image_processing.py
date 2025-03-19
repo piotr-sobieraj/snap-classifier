@@ -1,11 +1,3 @@
-import numpy as np
-
-
-def preprocess_image(image):
-    img = np.array(image).reshape(28,28,1).astype('float32')
-    return img
-
-
 ## Walidacja danych
 def validate_image(data):
 

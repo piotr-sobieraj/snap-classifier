@@ -8,11 +8,11 @@ from utils.data_formatter import format_json_data
 from utils.image_processing import validate_image
 
 
-# Funkcja ładująca model MLP
+# Funkcja ładująca model CNN
 def load_cnn_model():
     global cnn
     client = Client()
-    file_data = client.download_as_bytes("cnn_model.pkl")
+    file_data = client.download_as_bytes("model_cnn_aug.pkl")
     if file_data:
         cnn = pickle.loads(file_data)
         return cnn
@@ -27,14 +27,13 @@ def classify_cnn():
     if not validate_image(data): 
         return jsonify({"error": "Błąd przy walidacji obrazka"})
 
-    # Czy model MLP jest załadowany?
+    # Czy model CNN jest załadowany?
     if cnn is None:
         return jsonify({"error": "Model CNN nie został załadowany."}), 500
 
-
     # Pobranie i przetworzenie wektora obrazka
     img_vector = np.array(data['image']).reshape(1, 28, 28).astype('float32') / 255
-
+    
     # Predykcja etykiety za pomocą załadowanego modelu
     predictions = cnn.predict(img_vector)[0]
 

@@ -31,7 +31,7 @@ def classify_knn():
         return jsonify({"error": "Model is not loaded."}), 500
 
     # Pobranie i przetworzenie wektora obrazka
-    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32')
+    img_vector = np.array(data['image']).reshape(1, 28 * 28).astype('float32') / 255
 
     # Predykcja etykiety za pomocą załadowanego modelu
     predicted_label = knn.predict(img_vector)[0]
