@@ -1,7 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS  # Import CORS
 
-from services.cnn_service import classify_cnn, load_cnn_model
+from services.cnn_aug_service import classify_cnn_aug, load_cnn_aug_model
 from services.knn_service import classify_knn, load_knn_model
 from services.mlp_service import classify_mlp, load_mlp_model
 
@@ -11,20 +11,21 @@ CORS(app)  # Enable CORS for all routes
 # Inicjalizacja modeli KNN i MLP na poziomie globalnym
 knn = None
 mlp = None
-cnn = None
+# cnn = None
+cnn_aug = None
 
 
 # Ładowanie modelu
 try:
     knn = load_knn_model()
     mlp = load_mlp_model()
-    cnn = load_cnn_model()
+    cnn_aug = load_cnn_aug_model()
 except Exception as e:
     print(f"Błąd ładowania modeli: {e}")
 
 @app.route('/')
 def index():
-    return "Serwer Flask działa poprawnie. Modele KNN, MLP i CNN zostały wczytane."
+    return "Serwer Flask działa poprawnie. Modele KNN, MLP i CNN i CNN augmented zostały wczytane."
     
 
 # Endpoint do klasyfikacji obrazka KNN
@@ -37,10 +38,10 @@ def classify_knn_client():
 def classify_mlp_client():
     return classify_mlp()
 
-# Endpoint do klasyfikacji obrazka CNN
-@app.route('/classify_cnn', methods=['POST'])
-def classify_cnn_client():
-    return classify_cnn()
+# Endpoint do klasyfikacji obrazka CNN augmented
+@app.route('/classify_cnn_aug', methods=['POST'])
+def classify_cnn_aug_client():
+    return classify_cnn_aug()
 
 
 if __name__ == '__main__':
