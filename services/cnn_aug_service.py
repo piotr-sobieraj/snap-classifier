@@ -37,4 +37,4 @@ def classify_cnn_aug():
     # Predykcja etykiety za pomocą załadowanego modelu
     predictions = cnn_aug.predict(img_vector)[0]
 
-    return jsonify(format_json_data(predictions, 'CNN_aug'))
+    return jsonify(format_json_data(predictions, 'CNN_AUG'))
